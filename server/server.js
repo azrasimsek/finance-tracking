@@ -3,19 +3,21 @@ const app = express();
 const dotenv = require('dotenv');
 dotenv.config();
 const port = process.env.PORT || 3000; // Dinamik port ataması
+const path = require('path');
+const cors = require('cors');
 const sequelize = require('./config/db'); // Veritabanı bağlantısı
-// const User = require('./models/User');
-// const Categories = require('./models/Categories');
 const index = require('./models/index'); // İlişkiler
-// const Exchange_Rate = require('./models/Exchange_Rate');
-// const Transaction = require('./models/Transaction');
+const cookieParser = require('cookie-parser');
 
 // Routerlar
 const userRoutes = require('./routes/user');
-const adminRoutes = require('./routes/admin');
+const authRoutes = require('./routes/auth');
 
-// body parser
+app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+// Sadece uploads klasörünü /uploads yolu ile serve eder
+app.use('/img', express.static(path.join(__dirname, 'public/img')));
 
 // Veritabanı bağlantısını test et
 const connectDB = async () => {
@@ -27,12 +29,11 @@ const connectDB = async () => {
     }
 }
 
-
 // Veritabanı tablolarını senkronize et (uygulama ilk açıldığında)
 const syncDatabase = async () => {
   try {
     // Önce ana tablolar
-    await index.User.sync();
+    await index.User.sync({ alter: true});
     await index.Categories.sync();
     
     // Sonra foreign key içeren tablolar
@@ -50,8 +51,8 @@ connectDB();
 syncDatabase();
 
 // Routerlar
-app.use('/user', userRoutes);
-app.use('/admin', adminRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/auth', authRoutes);
 
 
 app.listen(port, () => {

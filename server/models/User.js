@@ -45,6 +45,14 @@ const User = sequelize.define(
       type: DataTypes.STRING(20),
       allowNull: false,
       unique: true
+    },
+    author: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    refresh_token: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     }
   },
   {
